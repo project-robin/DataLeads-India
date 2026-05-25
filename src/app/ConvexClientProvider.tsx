@@ -3,8 +3,17 @@
 import { ReactNode } from "react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 
-const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || "";
-const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
+const rawUrl = (process.env.NEXT_PUBLIC_CONVEX_URL || "").trim();
+const convexUrl = rawUrl && !rawUrl.startsWith("http") ? `https://${rawUrl}` : rawUrl;
+
+let convex: ConvexReactClient | null = null;
+try {
+  if (convexUrl) {
+    convex = new ConvexReactClient(convexUrl);
+  }
+} catch (error) {
+  console.error("Invalid Convex URL configuration:", error);
+}
 
 export default function ConvexClientProvider({
   children,
