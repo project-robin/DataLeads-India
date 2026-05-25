@@ -70,27 +70,33 @@ export class GeminiLiveClient {
 
           this.workletNode.port.onmessage = (event) => {
             if (this.ws?.readyState === WebSocket.OPEN) {
-              // event.data is Int16Array
-              const base64Data = this.arrayBufferToBase64(event.data.buffer);
-              this.ws.send(
-                JSON.stringify({
-                  realtimeInput: {
-                    audio: {
-                      mimeType: "audio/pcm;rate=16000",
-                      data: base64Data,
-                    },
-                  },
-                })
-              );
-              
               // Calculate a simple volume metric for the UI visualizer
+              let sum = 0;
+              for (let i = 0; i < event.data.length; i++) {
+                  sum += Math.abs(event.data[i]);
+              }
+              const avg = sum / event.data.length;
+              
               if (this.onVolumeChange) {
-                  let sum = 0;
-                  for (let i = 0; i < event.data.length; i++) {
-                      sum += Math.abs(event.data[i]);
-                  }
-                  const avg = sum / event.data.length;
                   this.onVolumeChange(Math.min(100, (avg / 32768) * 500)); 
+              }
+
+              // SOFTWARE VAD (Voice Activity Detection):
+              // Filter out speaker echo and background noise. 
+              // If volume is too low, we drop the packet. This sends perfect silence
+              // to Gemini, allowing its server-side VAD to respond extremely fast.
+              if (avg > 150) {
+                const base64Data = this.arrayBufferToBase64(event.data.buffer);
+                this.ws.send(
+                  JSON.stringify({
+                    realtimeInput: {
+                      audio: {
+                        mimeType: "audio/pcm;rate=16000",
+                        data: base64Data,
+                      },
+                    },
+                  })
+                );
               }
             }
           };
