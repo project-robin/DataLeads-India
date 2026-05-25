@@ -87,11 +87,12 @@ export class GeminiLiveClient {
               }
 
               // SOFTWARE VAD & AUDIO SUPPRESSION SHIELD:
-              // 1. If the volume is below our threshold (200), send silence to block background noise.
-              // 2. If the agent is currently speaking, MUTE the microphone (send silence).
-              //    This guarantees the agent never interrupts itself, ensuring a perfectly fluid response.
-              const isAgentSpeaking = this.audioContext && this.nextPlayTime > this.audioContext.currentTime;
-              const threshold = 200;
+              // 1. If the volume is below our threshold (500), send silence to block background noise.
+              // 2. If the agent is currently speaking (or was speaking in the last 500ms), MUTE the microphone.
+              //    This guarantees the agent never interrupts itself during network stutters.
+              const currentTime = this.audioContext ? this.audioContext.currentTime : 0;
+              const isAgentSpeaking = this.nextPlayTime > currentTime - 0.5; // 500ms tail
+              const threshold = 500; // Increased to prevent breathing from interrupting
               
               if (isAgentSpeaking || max < threshold) {
                  // Send silence
@@ -206,7 +207,7 @@ export class GeminiLiveClient {
     // few incoming network chunks behind this one, ensuring perfectly fluid playback 
     // even if the network stutters slightly.
     if (this.nextPlayTime < currentTime) {
-      this.nextPlayTime = currentTime + 0.15; // 150ms buffer
+      this.nextPlayTime = currentTime + 0.3; // 300ms buffer for seamless streaming
     }
     source.start(this.nextPlayTime);
     this.nextPlayTime += audioBuffer.duration;
