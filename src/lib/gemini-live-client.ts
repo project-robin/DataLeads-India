@@ -41,7 +41,7 @@ export class GeminiLiveClient {
                 model: this.config.model || "models/gemini-3.1-flash-live-preview",
                 systemInstruction: this.config.systemInstruction,
                 generationConfig: {
-                  responseModalities: ["AUDIO", "TEXT"],
+                  responseModalities: ["AUDIO"],
                   speechConfig: {
                     voiceConfig: {
                       prebuiltVoiceConfig: {
