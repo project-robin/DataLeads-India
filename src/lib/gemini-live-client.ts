@@ -71,23 +71,26 @@ export class GeminiLiveClient {
           this.workletNode.port.onmessage = (event) => {
             if (this.ws?.readyState === WebSocket.OPEN) {
               // Calculate a simple volume metric for the UI visualizer
+              let max = 0;
               let sum = 0;
               for (let i = 0; i < event.data.length; i++) {
-                  sum += Math.abs(event.data[i]);
+                  const val = Math.abs(event.data[i]);
+                  sum += val;
+                  if (val > max) max = val;
               }
               const avg = sum / event.data.length;
               
               if (this.onVolumeChange) {
-                  this.onVolumeChange(Math.min(100, (avg / 32768) * 500)); 
+                  // Send true max volume (scaled 0-100)
+                  this.onVolumeChange(Math.min(100, (max / 32768) * 1000)); 
               }
 
               // SOFTWARE VAD (Voice Activity Detection):
-              // Filter out speaker echo and background noise. 
-              // If volume is too low, we send perfect silence (zeros).
-              // Do NOT drop the packet, otherwise Gemini thinks the network is lagging 
-              // and waits forever. Sending silence triggers the server-side VAD instantly.
-              const threshold = 150;
-              if (avg < threshold) {
+              // Previously, the threshold was based on 'avg' and was set way too high (150).
+              // Normal microphones might only have an 'avg' of 30, so it blocked ALL speech!
+              // Now we use 'max' (peak amplitude) and a much lower, realistic threshold of 200.
+              const threshold = 200;
+              if (max < threshold) {
                  // Send silence
                  const silentBuffer = new Int16Array(event.data.length);
                  const base64Data = this.arrayBufferToBase64(silentBuffer.buffer);
