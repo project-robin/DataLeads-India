@@ -8,10 +8,10 @@ const convex = process.env.NEXT_PUBLIC_CONVEX_URL
 
 export async function POST(req: Request) {
   try {
-    const { leadId } = await req.json();
+    const { slug } = await req.json();
 
-    if (!leadId) {
-      return NextResponse.json({ error: "Missing leadId" }, { status: 400 });
+    if (!slug) {
+      return NextResponse.json({ error: "Missing slug" }, { status: 400 });
     }
 
     if (!convex) {
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     // Verify lead exists
-    const lead = await convex.query(api.leads.get, { uuid: leadId });
+    const lead = await convex.query(api.leads.getBySlug, { slug });
     if (!lead) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
@@ -58,6 +58,7 @@ Your goal is to offer your CA services for GST filing, accounting, and complianc
 
     return NextResponse.json({
       apiKey: apiKey || "MOCK_KEY",
+      leadId: lead._id,
       config: {
         systemInstruction,
         model: "models/gemini-3.1-flash-live-preview",

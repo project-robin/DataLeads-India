@@ -7,6 +7,7 @@ export class GeminiLiveClient {
   
   public onStateChange: ((state: "connecting" | "listening" | "error" | "disconnected", msg?: string) => void) | null = null;
   public onVolumeChange: ((volume: number) => void) | null = null;
+  public onTranscript: ((role: string, text: string) => void) | null = null;
 
   constructor(
     private apiKey: string,
@@ -40,7 +41,7 @@ export class GeminiLiveClient {
                 model: this.config.model || "models/gemini-3.1-flash-live-preview",
                 systemInstruction: this.config.systemInstruction,
                 generationConfig: {
-                  responseModalities: ["AUDIO"],
+                  responseModalities: ["AUDIO", "TEXT"],
                   speechConfig: {
                     voiceConfig: {
                       prebuiltVoiceConfig: {
@@ -140,6 +141,9 @@ export class GeminiLiveClient {
             for (const part of parts) {
               if (part.inlineData && part.inlineData.data) {
                 this.playAudioChunk(part.inlineData.data);
+              }
+              if (part.text && this.onTranscript) {
+                this.onTranscript("agent", part.text);
               }
             }
           }

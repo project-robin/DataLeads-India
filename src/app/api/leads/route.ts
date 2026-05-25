@@ -34,6 +34,15 @@ export async function GET(req: Request) {
   }
 }
 
+function generateSlug(name: string): string {
+  const cleanName = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  return `${cleanName}-${randomSuffix}`;
+}
+
 export async function POST(req: Request) {
   if (!validateAuth(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -46,14 +55,16 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     let leadData = "";
+    
+    // Fallback to structured fields
+    const { companyName, contactPerson, industry, notes } = body;
+    const businessName = companyName || "Unknown Business";
+    const slug = generateSlug(businessName);
 
     if (body.leadData && typeof body.leadData === "string") {
       // Use raw text block if supplied directly
       leadData = body.leadData;
     } else {
-      // Fallback to structured fields
-      const { companyName, contactPerson, industry, notes } = body;
-      
       if (!companyName && !contactPerson && !industry && !notes) {
         return NextResponse.json(
           { error: "Missing required fields. Provide either 'leadData' or structured fields ('companyName', 'contactPerson', etc.)" },
@@ -69,16 +80,17 @@ Notes/Pain Points: ${notes || "N/A"}`;
 
     // Generate UUID and save
     const uuid = crypto.randomUUID();
-    await convex.mutation(api.leads.create, { uuid, leadData });
+    await convex.mutation(api.leads.create, { uuid, leadData, slug, businessName });
 
-    // Build the dynamic URL
+    // Build the dynamic URL using slug instead of UUID
     const origin = req.headers.get("origin") || req.headers.get("host") || "http://localhost:3000";
-    const demoUrl = `${origin.startsWith("http") ? "" : "http://"}${origin}/demo/${uuid}`;
+    const demoUrl = `${origin.startsWith("http") ? "" : "http://"}${origin}/demo/${slug}`;
 
     return NextResponse.json(
       {
         message: "Demo lead created successfully",
         uuid,
+        slug,
         demoUrl,
         leadData,
       },

@@ -5,11 +5,15 @@ export const create = mutation({
   args: {
     uuid: v.string(),
     leadData: v.string(),
+    slug: v.optional(v.string()),
+    businessName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("leads", {
       uuid: args.uuid,
       leadData: args.leadData,
+      slug: args.slug,
+      businessName: args.businessName,
     });
   },
 });
@@ -20,6 +24,16 @@ export const get = query({
     return await ctx.db
       .query("leads")
       .withIndex("by_uuid", (q) => q.eq("uuid", args.uuid))
+      .first();
+  },
+});
+
+export const getBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("leads")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .first();
   },
 });

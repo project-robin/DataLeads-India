@@ -2,11 +2,13 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
 import { GeminiLiveClient } from "../../../lib/gemini-live-client";
 
 export default function VoiceDemoPage() {
   const params = useParams();
-  const leadId = params.leadId as string;
+  const slug = params.slug as string;
 
   const [status, setStatus] = useState<"loading" | "ready" | "connecting" | "listening" | "error" | "disconnected">("loading");
   const [errorMsg, setErrorMsg] = useState("");
@@ -15,15 +17,36 @@ export default function VoiceDemoPage() {
   
   const clientRef = useRef<GeminiLiveClient | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transcriptRef = useRef<{ role: string; text: string; timestamp: number }[]>([]);
+  const speechRecognitionRef = useRef<any>(null);
+
+  const saveTranscript = useMutation(api.conversations.saveTranscript);
+
+  // Initialize Speech Recognition for User logging
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.onresult = (event: any) => {
+          const last = event.results.length - 1;
+          const text = event.results[last][0].transcript;
+          if (text.trim()) {
+            transcriptRef.current.push({ role: "user", text: text.trim(), timestamp: Date.now() });
+          }
+        };
+        speechRecognitionRef.current = recognition;
+      }
+    }
+  }, []);
 
   // 2-Minute Session Limit
   useEffect(() => {
     if (status === "listening") {
       timerRef.current = setTimeout(() => {
-        if (clientRef.current) {
-          clientRef.current.disconnect();
-        }
-        setStatus("disconnected");
+        disconnect();
       }, 120000); // 2 minutes
     } else {
       if (timerRef.current) {
@@ -45,7 +68,7 @@ export default function VoiceDemoPage() {
         const res = await fetch("/api/token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ leadId }),
+          body: JSON.stringify({ slug }),
         });
         const data = await res.json();
         
@@ -66,10 +89,10 @@ export default function VoiceDemoPage() {
     
     return () => {
       if (clientRef.current) {
-        clientRef.current.disconnect();
+        clientRef.current.disconnect(true);
       }
     };
-  }, [leadId]);
+  }, [slug]);
 
   const connectToGeminiLive = async () => {
     if (!tokenInfo) return;
@@ -86,14 +109,38 @@ export default function VoiceDemoPage() {
       setVolume(vol);
     };
 
+    client.onTranscript = (role, text) => {
+      transcriptRef.current.push({ role, text, timestamp: Date.now() });
+    };
+
     await client.connect();
+
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.start();
+      } catch (e) {
+        console.warn("Speech recognition already started or failed", e);
+      }
+    }
   };
 
   const disconnect = () => {
     if (clientRef.current) {
       clientRef.current.disconnect();
     }
-    setStatus("ready");
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.stop();
+      } catch (e) {}
+    }
+    if (transcriptRef.current.length > 0 && tokenInfo?.leadId) {
+      saveTranscript({
+        leadId: tokenInfo.leadId,
+        transcript: transcriptRef.current,
+      }).catch(console.error);
+      transcriptRef.current = []; // Clear after saving
+    }
+    setStatus("disconnected");
   };
 
   return (
