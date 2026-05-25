@@ -83,20 +83,23 @@ export class GeminiLiveClient {
 
               // SOFTWARE VAD (Voice Activity Detection):
               // Filter out speaker echo and background noise. 
-              // If volume is too low, we drop the packet. This sends perfect silence
-              // to Gemini, allowing its server-side VAD to respond extremely fast.
-              if (avg > 150) {
-                const base64Data = this.arrayBufferToBase64(event.data.buffer);
-                this.ws.send(
-                  JSON.stringify({
-                    realtimeInput: {
-                      audio: {
-                        mimeType: "audio/pcm;rate=16000",
-                        data: base64Data,
-                      },
-                    },
-                  })
-                );
+              // If volume is too low, we send perfect silence (zeros).
+              // Do NOT drop the packet, otherwise Gemini thinks the network is lagging 
+              // and waits forever. Sending silence triggers the server-side VAD instantly.
+              const threshold = 150;
+              if (avg < threshold) {
+                 // Send silence
+                 const silentBuffer = new Int16Array(event.data.length);
+                 const base64Data = this.arrayBufferToBase64(silentBuffer.buffer);
+                 this.ws.send(JSON.stringify({
+                    realtimeInput: { audio: { mimeType: "audio/pcm;rate=16000", data: base64Data } }
+                 }));
+              } else {
+                 // Send real audio
+                 const base64Data = this.arrayBufferToBase64(event.data.buffer);
+                 this.ws.send(JSON.stringify({
+                    realtimeInput: { audio: { mimeType: "audio/pcm;rate=16000", data: base64Data } }
+                 }));
               }
             }
           };
