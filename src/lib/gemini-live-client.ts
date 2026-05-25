@@ -85,12 +85,14 @@ export class GeminiLiveClient {
                   this.onVolumeChange(Math.min(100, (max / 32768) * 1000)); 
               }
 
-              // SOFTWARE VAD (Voice Activity Detection):
-              // Previously, the threshold was based on 'avg' and was set way too high (150).
-              // Normal microphones might only have an 'avg' of 30, so it blocked ALL speech!
-              // Now we use 'max' (peak amplitude) and a much lower, realistic threshold of 200.
+              // SOFTWARE VAD & AUDIO SUPPRESSION SHIELD:
+              // 1. If the volume is below our threshold (200), send silence to block background noise.
+              // 2. If the agent is currently speaking, MUTE the microphone (send silence).
+              //    This guarantees the agent never interrupts itself, ensuring a perfectly fluid response.
+              const isAgentSpeaking = this.audioContext && this.nextPlayTime > this.audioContext.currentTime;
               const threshold = 200;
-              if (max < threshold) {
+              
+              if (isAgentSpeaking || max < threshold) {
                  // Send silence
                  const silentBuffer = new Int16Array(event.data.length);
                  const base64Data = this.arrayBufferToBase64(silentBuffer.buffer);
@@ -193,8 +195,14 @@ export class GeminiLiveClient {
 
     // Schedule playback to avoid gaps
     const currentTime = this.audioContext.currentTime;
+    
+    // JITTER BUFFER FIX:
+    // If the queue is empty or we fell behind (e.g. starting a new sentence), 
+    // add a 150ms artificial delay. This allows the browser to queue up the next 
+    // few incoming network chunks behind this one, ensuring perfectly fluid playback 
+    // even if the network stutters slightly.
     if (this.nextPlayTime < currentTime) {
-      this.nextPlayTime = currentTime;
+      this.nextPlayTime = currentTime + 0.15; // 150ms buffer
     }
     source.start(this.nextPlayTime);
     this.nextPlayTime += audioBuffer.duration;
