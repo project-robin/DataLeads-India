@@ -56,8 +56,21 @@ export async function POST(req: Request) {
     const body = await req.json();
     let leadData = "";
     
-    // Fallback to structured fields
-    const { companyName, contactPerson, industry, notes } = body;
+    const {
+      companyName,
+      contactPerson,
+      industry,
+      website,
+      offerAngle,
+      painBucket,
+      agentGoal,
+      forbiddenClaims,
+      handoffInstructions,
+      tone,
+      sourceUrls,
+      notes,
+    } = body;
+    
     const businessName = companyName || "Unknown Business";
     const slug = generateSlug(businessName);
 
@@ -65,17 +78,31 @@ export async function POST(req: Request) {
       // Use raw text block if supplied directly
       leadData = body.leadData;
     } else {
-      if (!companyName && !contactPerson && !industry && !notes) {
+      if (!companyName && !contactPerson && !industry && !notes && !agentGoal) {
         return NextResponse.json(
-          { error: "Missing required fields. Provide either 'leadData' or structured fields ('companyName', 'contactPerson', etc.)" },
+          { error: "Missing required fields. Provide either 'leadData' or structured fields." },
           { status: 400 }
         );
       }
 
+      const formatArray = (arr: any) => Array.isArray(arr) && arr.length > 0 ? arr.join(", ") : "N/A";
+
       leadData = `Company Name: ${companyName || "N/A"}
 Contact Person: ${contactPerson || "N/A"}
 Industry: ${industry || "N/A"}
-Notes/Pain Points: ${notes || "N/A"}`;
+Website: ${website || "N/A"}
+Source URLs (For Context): ${formatArray(sourceUrls)}
+
+### Business Context:
+Offer Angle / Value Proposition: ${offerAngle || "N/A"}
+Customer Pain Points: ${painBucket || "N/A"}
+Additional Notes: ${notes || "N/A"}
+
+### Agent Role & Guidelines:
+Agent Goal: ${agentGoal || "N/A"}
+Desired Tone: ${tone || "Professional and empathetic"}
+Forbidden Claims (DO NOT SAY THESE): ${formatArray(forbiddenClaims)}
+Handoff Instructions: ${handoffInstructions || "N/A"}`;
     }
 
     // Generate UUID and save
