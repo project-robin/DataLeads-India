@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { GeminiLiveClient } from "../../../lib/gemini-live-client";
+import { getCalApi } from "@calcom/embed-react";
 
 export default function VoiceDemoPage() {
   const params = useParams();
@@ -40,6 +41,14 @@ export default function VoiceDemoPage() {
         speechRecognitionRef.current = recognition;
       }
     }
+  }, []);
+
+  // Initialize Cal.com Embed
+  useEffect(() => {
+    (async function () {
+      const cal = await getCalApi({"namespace":"30min"});
+      cal("ui", {"styles":{"branding":{"brandColor":"#00d4ff"}},"hideEventTypeDetails":false,"layout":"month_view"});
+    })();
   }, []);
 
   // 2-Minute Session Limit
@@ -147,10 +156,10 @@ export default function VoiceDemoPage() {
     <div className="min-h-screen bg-[#05090f] text-[#f5f8ff] flex flex-col items-center justify-center p-6 relative overflow-hidden">
       
       {/* Permanent Top-Right Booking Button */}
-      <a
-        href="https://cal.com/kabir-aura-mpaprf/30min"
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        data-cal-namespace="30min"
+        data-cal-link="kabir-aura-mpaprf/30min"
+        data-cal-config='{"layout":"month_view"}'
         className="absolute top-6 right-6 z-50 px-5 py-2.5 rounded-full border border-[rgba(0,212,255,0.3)] bg-[rgba(13,26,46,0.6)] backdrop-blur-md text-sm font-semibold text-[#00d4ff] hover:bg-[rgba(0,212,255,0.1)] hover:border-[rgba(0,212,255,0.6)] hover:shadow-[0_0_20px_rgba(0,212,255,0.2)] transition-all duration-300 flex items-center gap-2"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -160,7 +169,7 @@ export default function VoiceDemoPage() {
           <line x1="3" y1="10" x2="21" y2="10"></line>
         </svg>
         Book Consultation
-      </a>
+      </button>
 
       {/* Decorative Blob */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[rgba(0,212,255,0.03)] rounded-full blur-[100px] pointer-events-none" />
@@ -209,6 +218,15 @@ export default function VoiceDemoPage() {
           </button>
         )}
 
+        <div className="mt-8 text-xs text-[rgba(200,215,240,0.4)] flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Note: User interruption is disabled in this demo environment.
+        </div>
+
         {status === "disconnected" && (
           <div className="flex flex-col items-center mt-4 w-full animate-in fade-in zoom-in duration-500">
             <div className="p-6 bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.2)] rounded-2xl w-full">
@@ -216,14 +234,14 @@ export default function VoiceDemoPage() {
               <p className="text-sm text-[rgba(200,215,240,0.8)] mb-6">
                 Your demo has concluded. Want to implement this AI voice agent in your own business?
               </p>
-              <a
-                href="https://cal.com/kabir-aura-mpaprf/30min"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                data-cal-namespace="30min"
+                data-cal-link="kabir-aura-mpaprf/30min"
+                data-cal-config='{"layout":"month_view"}'
                 className="inline-flex items-center justify-center w-full px-6 py-3 rounded-full bg-gradient-to-r from-[#00d4ff] to-[#0088ff] text-[#05090f] font-semibold hover:shadow-[0_0_30px_rgba(0,212,255,0.4)] transition-all duration-300"
               >
                 Book a Consultation
-              </a>
+              </button>
             </div>
           </div>
         )}
