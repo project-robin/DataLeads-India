@@ -30,8 +30,19 @@ export default function AdminPage() {
     
     // Generate a secure random UUID for the link
     const uuid = crypto.randomUUID();
+
+    // Derive a URL-safe slug from the first non-empty line of lead data
+    const firstLine = leadData.trim().split("\n")[0] || "lead";
+    const cleanName = firstLine
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "")
+      .slice(0, 40);
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    const slug = `${cleanName}-${randomSuffix}`;
+    const businessName = firstLine.trim();
     
-    await createLead({ uuid, leadData });
+    await createLead({ uuid, leadData, slug, businessName });
     setLeadData("");
   };
 
@@ -94,7 +105,7 @@ export default function AdminPage() {
                     <div key={lead._id} className="bg-[#05090f] p-4 rounded border border-gray-800 flex justify-between items-start gap-4">
                       <div className="flex-1 overflow-hidden">
                         <div className="text-sm text-[#00d4ff] mb-2 font-mono break-all">
-                          {typeof window !== "undefined" ? window.location.origin : ""}/demo/{lead.uuid}
+                          {typeof window !== "undefined" ? window.location.origin : ""}/demo/{lead.slug || lead.uuid}
                         </div>
                         <div className="text-sm text-gray-400 line-clamp-2">
                           {lead.leadData}
@@ -104,7 +115,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => {
                             if (typeof window !== "undefined") {
-                              navigator.clipboard.writeText(`${window.location.origin}/demo/${lead.uuid}`);
+                              navigator.clipboard.writeText(`${window.location.origin}/demo/${lead.slug || lead.uuid}`);
                               alert("Copied to clipboard!");
                             }
                           }}
