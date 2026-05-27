@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { getCalApi } from "@calcom/embed-react";
 
 export default function Home() {
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -124,6 +125,12 @@ export default function Home() {
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(document.body);
 
+    // Initialize Cal.com Embed
+    (async function () {
+      const cal = await getCalApi({"namespace":"30min"});
+      cal("ui", {"styles":{"branding":{"brandColor":"#00d4ff"}},"hideEventTypeDetails":false,"layout":"month_view"});
+    })();
+
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationFrameId);
@@ -150,48 +157,53 @@ export default function Home() {
       {/* NAV */}
       <nav>
         <div className="nav-logo">
-          Data<span>Leads</span> India
+          Aura<span>Voice</span> AI
         </div>
-        <a
+        <button
+          data-cal-namespace="30min"
+          data-cal-link="kabir-aura-mpaprf/30min"
+          data-cal-config='{"layout":"month_view"}'
           className="nav-cta"
-          href="https://wa.me/918329727869?text=Hi%20DataLeads,%20I%20would%20like%20a%20free%20sample%20of%20GST%20leads."
-          target="_blank"
-          rel="noopener noreferrer"
         >
-          Get Free Sample
-        </a>
+          Book Consultation
+        </button>
       </nav>
 
       {/* HERO */}
       <section className="hero" style={{ position: "relative" }}>
-        <p className="eyebrow">Verified B2B Data — For Financial Professionals</p>
+        <p className="eyebrow">The New Standard in AI Automation</p>
         <h1>
-          Stop Hunting<br />
-          for <span className="accent">Clients.</span><br />
-          We Deliver.
+          The AI Employee<br />
+          That <span className="accent">Never Sleeps.</span>
         </h1>
         <p className="hero-sub">
-          Fresh <strong>GST Business Leads</strong> delivered directly to Chartered
-          Accountants — newly registered businesses in Tier‑2 cities, with the
-          owner's direct mobile number, within <strong>30 days of incorporation.</strong>
+          <strong>AI Voice Agents</strong> that close deals, book appointments, and handle customer support around the clock. 
+          Ultra-low latency, completely indistinguishable from human receptionists.
         </p>
         <div className="hero-actions">
-          <a
+          <button
+            data-cal-namespace="30min"
+            data-cal-link="kabir-aura-mpaprf/30min"
+            data-cal-config='{"layout":"month_view"}'
             className="btn-primary"
-            href="https://wa.me/918329727869?text=Hi%20DataLeads,%20I%20would%20like%20a%20free%20sample%20of%20GST%20leads."
-            target="_blank"
-            rel="noopener noreferrer"
           >
             <svg
-              className="whatsapp-icon"
               width="18"
               height="18"
               viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            Request Free 10-Lead Sample
-          </a>
+            Book a Free Consultation
+          </button>
           <a className="btn-ghost" href="#pricing">
             View Pricing →
           </a>
@@ -207,43 +219,39 @@ export default function Home() {
 
       {/* VALUE PROP */}
       <section className="value-section">
-        <p className="section-label reveal">How It Works</p>
+        <p className="section-label reveal">Why Choose Us</p>
         <h2 className="section-title reveal">
-          Proprietary extraction.<br />
-          <em>Precision targeting.</em>
+          Beyond chatbots.<br />
+          <em>True conversational AI.</em>
         </h2>
 
         <div className="value-grid">
-          <div className="value-card reveal">
+          <div className="value-card reveal glass-card">
             <div className="value-num">01</div>
-            <h3>Proprietary GST Extraction</h3>
+            <h3>Human-Like Conversations</h3>
             <p>
-              We use a custom data pipeline to monitor newly registered GST
-              businesses the moment they appear — before anyone else reaches out.
+              Ultra-low latency models that understand context, nuance, and interruptions. Your customers won't know they are talking to an AI.
             </p>
           </div>
-          <div className="value-card reveal">
+          <div className="value-card reveal glass-card">
             <div className="value-num">02</div>
-            <h3>Tier-2 City Focus</h3>
+            <h3>24/7 Availability</h3>
             <p>
-              Less competition, more opportunity. We target emerging business
-              districts in Tier-2 cities where CAs are underrepresented.
+              Never miss a lead or customer inquiry again. Handle support, booking, and sales calls around the clock, simultaneously.
             </p>
           </div>
-          <div className="value-card reveal">
+          <div className="value-card reveal glass-card">
             <div className="value-num">03</div>
-            <h3>Owner's Direct Number</h3>
+            <h3>Seamless Integrations</h3>
             <p>
-              No gatekeepers. Each lead includes the owner's verified mobile
-              number — reach decision-makers on day one.
+              Our agents connect directly to your CRM, Calendly, and internal databases to update records and book appointments instantly.
             </p>
           </div>
-          <div className="value-card reveal">
+          <div className="value-card reveal glass-card">
             <div className="value-num">04</div>
-            <h3>Within 30 Days of Incorporation</h3>
+            <h3>Native Multilingual Support</h3>
             <p>
-              Strike while the iron is hot. New businesses need CA services
-              immediately. You'll be calling before they've signed with anyone.
+              Speaks English, Hindi, Spanish, Marathi, Arabic, and more. Instantly switches languages based on what the caller speaks.
             </p>
           </div>
         </div>
@@ -255,54 +263,54 @@ export default function Home() {
       <section className="pricing-section" id="pricing">
         <p className="section-label reveal">Transparent Pricing</p>
         <h2 className="section-title reveal">
-          Pay only for<br />
-          <em>verified leads.</em>
+          Scale your business<br />
+          <em>without the overhead.</em>
         </h2>
 
         <div className="pricing-grid">
-          <div className="price-card reveal">
-            <p className="price-label">Starter Pack</p>
-            <h3 className="price-title">100 Verified Local Leads</h3>
-            <div className="price-amount">₹2,000</div>
-            <p className="price-unit">One-time · Specific city</p>
+          <div className="price-card reveal glass-card">
+            <p className="price-label">Standard Setup</p>
+            <h3 className="price-title">Starter AI Agent</h3>
+            <div className="price-amount">Custom</div>
+            <p className="price-unit">One-time setup + Monthly SaaS</p>
             <ul className="price-features">
-              <li>100 newly registered GST businesses</li>
-              <li>Owner's direct mobile number</li>
-              <li>Within 30 days of incorporation</li>
-              <li>Tier-2 city of your choice</li>
-              <li>CSV / Excel delivery</li>
+              <li>Inbound & Outbound capable</li>
+              <li>Custom knowledge base integration</li>
+              <li>Calendar / Booking system sync</li>
+              <li>Post-call SMS & Email follow-ups</li>
+              <li>Standard voice options</li>
             </ul>
-            <a
-              href="https://wa.me/918329727869?text=Hi%20DataLeads,%20I%20would%20like%20a%20free%20sample%20of%20GST%20leads."
+            <button
+              data-cal-namespace="30min"
+              data-cal-link="kabir-aura-mpaprf/30min"
+              data-cal-config='{"layout":"month_view"}'
               className="btn-card btn-card-cyan"
-              target="_blank"
-              rel="noopener noreferrer"
             >
-              Get Started on WhatsApp
-            </a>
+              Get a Quote
+            </button>
           </div>
 
-          <div className="price-card featured reveal">
-            <span className="featured-badge">Best Value</span>
-            <p className="price-label">City Exclusivity</p>
-            <h3 className="price-title">Full City Exclusivity Pack</h3>
-            <div className="price-amount">₹15,000</div>
-            <p className="price-unit">Monthly · Exclusive territory</p>
+          <div className="price-card featured reveal glass-card">
+            <span className="featured-badge">Enterprise</span>
+            <p className="price-label">Advanced Automation</p>
+            <h3 className="price-title">Fully Custom Agent</h3>
+            <div className="price-amount">Contact Us</div>
+            <p className="price-unit">For high-volume operations</p>
             <ul className="price-features">
-              <li>All new GST businesses in your city</li>
-              <li>No other CA gets the same leads</li>
-              <li>Owner's direct mobile — verified</li>
-              <li>Continuous monthly delivery</li>
-              <li>Priority support & refresh</li>
+              <li>Everything in Starter</li>
+              <li>Complex multi-step workflows</li>
+              <li>Live transfer to human agents</li>
+              <li>Voice cloning capabilities</li>
+              <li>Dedicated priority support</li>
             </ul>
-            <a
-              href="https://wa.me/918329727869?text=Hi%20DataLeads,%20I%20would%20like%20a%20free%20sample%20of%20GST%20leads."
+            <button
+              data-cal-namespace="30min"
+              data-cal-link="kabir-aura-mpaprf/30min"
+              data-cal-config='{"layout":"month_view"}'
               className="btn-card btn-card-gold"
-              target="_blank"
-              rel="noopener noreferrer"
             >
-              Lock My City Now
-            </a>
+              Schedule Discovery Call
+            </button>
           </div>
         </div>
       </section>
@@ -311,32 +319,37 @@ export default function Home() {
       <section className="cta-band">
         <div className="cta-band-inner">
           <h2 className="cta-headline reveal">
-            Try before<br />
-            you buy.
+            Hear it in<br />
+            action.
           </h2>
           <p className="cta-sub reveal">
-            We're confident enough to give you 10 real, verified leads at zero
-            cost. No credit card. No commitment. Just results you can call today.
+            Stop losing leads to missed calls and slow response times. Let an AI employee handle the heavy lifting while you focus on what matters.
           </p>
-          <a
+          <button
+            data-cal-namespace="30min"
+            data-cal-link="kabir-aura-mpaprf/30min"
+            data-cal-config='{"layout":"month_view"}'
             className="whatsapp-btn reveal"
-            href="https://wa.me/918329727869?text=Hi%20DataLeads,%20I%20would%20like%20a%20free%20sample%20of%20GST%20leads."
-            target="_blank"
-            rel="noopener noreferrer"
           >
-            <svg className="whatsapp-icon" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            <svg
+              className="whatsapp-icon"
+              viewBox="0 0 24 24"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            Request a Free 10-Lead Sample via WhatsApp
-          </a>
+            Book a Live Demo
+          </button>
         </div>
       </section>
 
       <footer>
         <div className="logo">
-          Data<span>Leads</span> India
+          Aura<span>Voice</span> AI
         </div>
-        <p>Verified B2B Data for Financial Professionals · India</p>
+        <p>Next-Gen AI Voice Agents for Modern Businesses</p>
       </footer>
     </>
   );

@@ -9,15 +9,17 @@
 }
 
 :root {
-  --ink-dark: #05090f;
-  --ink-mid: #0d1a2e;
-  --ink-navy: #0a1628;
+  --ink-dark: #030509;
+  --ink-mid: #0a111f;
+  --ink-navy: #0d1628;
   --cyan: #00d4ff;
   --cyan-dim: rgba(0,212,255,0.12);
+  --purple: #7b2cbf;
+  --purple-dim: rgba(123,44,191,0.15);
   --gold: #f0a500;
   --gold-dim: rgba(240,165,0,0.12);
-  --white: #f5f8ff;
-  --muted: rgba(200,215,240,0.55);
+  --white: #ffffff;
+  --muted: rgba(200,215,240,0.65);
 }
 
 html { scroll-behavior: smooth; }
@@ -62,9 +64,10 @@ nav {
   align-items: center;
   justify-content: space-between;
   padding: 1.2rem 3rem;
-  background: rgba(5,9,15,0.7);
+  background: rgba(3,5,9,0.5);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(0,212,255,0.1);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .nav-logo {
   font-family: var(--font-bebas), sans-serif;
@@ -135,8 +138,9 @@ section { position: relative; z-index: 1; }
 }
 
 .hero h1 .accent {
-  color: transparent;
-  -webkit-text-stroke: 1.5px var(--cyan);
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero-sub {
@@ -164,10 +168,11 @@ section { position: relative; z-index: 1; }
 .btn-primary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
-  background: var(--gold);
+  background: linear-gradient(135deg, var(--cyan), #0077ff);
   color: var(--ink-dark);
-  padding: 0.9rem 2rem;
+  padding: 0.9rem 2.2rem;
   border-radius: 2px;
   font-family: var(--font-syne), sans-serif;
   font-size: 0.95rem;
@@ -178,7 +183,7 @@ section { position: relative; z-index: 1; }
 }
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 40px rgba(240,165,0,0.35);
+  box-shadow: 0 10px 40px rgba(0,212,255,0.35);
 }
 
 .btn-ghost {
@@ -271,23 +276,28 @@ section { position: relative; z-index: 1; }
   border: 1px solid rgba(0,212,255,0.1);
 }
 .value-card {
-  background: var(--ink-dark);
-  padding: 2rem 2rem 2.5rem;
+  background: rgba(10,17,31,0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 2.5rem 2rem 3rem;
   position: relative;
   overflow: hidden;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.3s;
 }
 .value-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: var(--cyan);
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s ease;
 }
-.value-card:hover { background: rgba(0,212,255,0.04); }
+.value-card:hover { 
+  background: rgba(10,17,31,0.8); 
+  transform: translateY(-4px);
+}
 .value-card:hover::before { transform: scaleX(1); }
 
 .value-num {
@@ -323,28 +333,31 @@ section { position: relative; z-index: 1; }
   margin-top: 3rem;
 }
 .price-card {
-  background: var(--ink-mid);
-  border: 1px solid rgba(0,212,255,0.12);
+  background: rgba(10,17,31,0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
   padding: 2.5rem;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s, border-color 0.3s;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 .price-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(0,212,255,0.4);
+  border-color: rgba(0,212,255,0.3);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
 }
 .price-card.featured {
-  border-color: var(--gold);
-  background: linear-gradient(135deg, rgba(240,165,0,0.08), var(--ink-mid));
+  border-color: rgba(123,44,191,0.4);
+  background: linear-gradient(135deg, rgba(123,44,191,0.08), rgba(10,17,31,0.8));
 }
-.price-card.featured:hover { border-color: var(--gold); }
+.price-card.featured:hover { border-color: var(--purple); }
 
 .featured-badge {
   position: absolute;
   top: 1.2rem; right: 1.2rem;
-  background: var(--gold);
-  color: var(--ink-dark);
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: var(--white);
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -372,7 +385,7 @@ section { position: relative; z-index: 1; }
   line-height: 1;
   margin: 1rem 0 0.5rem;
 }
-.price-card.featured .price-amount { color: var(--gold); }
+.price-card.featured .price-amount { color: #a155ec; }
 .price-unit {
   font-size: 0.85rem;
   color: var(--muted);
@@ -398,7 +411,7 @@ section { position: relative; z-index: 1; }
   flex-shrink: 0;
   margin-top: 1px;
 }
-.price-card.featured .price-features li::before { color: var(--gold); }
+.price-card.featured .price-features li::before { color: #a155ec; }
 
 .btn-card {
   display: block;
@@ -424,12 +437,12 @@ section { position: relative; z-index: 1; }
   transform: translateY(-2px);
 }
 .btn-card-gold {
-  background: var(--gold);
-  color: var(--ink-dark);
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: var(--white);
   border: none;
 }
 .btn-card-gold:hover {
-  box-shadow: 0 8px 30px rgba(240,165,0,0.35);
+  box-shadow: 0 8px 30px rgba(123,44,191,0.4);
   transform: translateY(-2px);
 }
 
@@ -468,8 +481,8 @@ section { position: relative; z-index: 1; }
   display: inline-flex;
   align-items: center;
   gap: 0.8rem;
-  background: #25D366;
-  color: #fff;
+  background: linear-gradient(135deg, var(--cyan), #0077ff);
+  color: #030509;
   padding: 1.1rem 2.5rem;
   border-radius: 2px;
   font-family: var(--font-syne), sans-serif;
@@ -481,11 +494,15 @@ section { position: relative; z-index: 1; }
 }
 .whatsapp-btn:hover {
   transform: translateY(-4px);
-  box-shadow: 0 14px 50px rgba(37,211,102,0.4);
+  box-shadow: 0 14px 50px rgba(0,212,255,0.4);
 }
 .whatsapp-icon {
   width: 22px; height: 22px;
-  fill: #fff;
+  stroke: #030509;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ──────── FOOTER ──────── */
@@ -546,6 +563,6 @@ footer p {
 }
 .blob-2 {
   width: 500px; height: 500px;
-  background: rgba(240,165,0,0.05);
+  background: rgba(123,44,191,0.06);
   bottom: 20%; left: -150px;
 }
