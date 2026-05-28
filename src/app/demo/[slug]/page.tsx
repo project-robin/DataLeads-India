@@ -122,6 +122,30 @@ export default function VoiceDemoPage() {
       transcriptRef.current.push({ role, text, timestamp: Date.now() });
     };
 
+    client.onFunctionCall = async (name, args) => {
+      if (name === "book_call") {
+        const res = await fetch("/api/cal-com", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "create_booking",
+            name: args.name,
+            email: args.email,
+            start: `${args.preferred_date}T${args.preferred_time}:00Z`,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Booking failed");
+        return {
+          success: true,
+          bookingUid: data.bookingUid,
+          start: data.start,
+          message: `Booking confirmed for ${args.preferred_date} at ${args.preferred_time}.`,
+        };
+      }
+      return { error: `Unknown function: ${name}` };
+    };
+
     await client.connect();
 
     if (speechRecognitionRef.current) {

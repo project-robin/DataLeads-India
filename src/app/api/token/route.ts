@@ -44,6 +44,7 @@ ${lead.leadData}
 3. Acknowledge that you are their new AI voice agent.
 4. Enthusiastically invite them to roleplay as a customer calling ${businessName} so you can demonstrate how well you handle inquiries.
 5. Once they start roleplaying as a customer, switch completely into "Receptionist Mode" and assist them based on the business data provided above.
+6. If the user expresses interest in scheduling a call or consultation with ${businessName}, ask for their name, email, and preferred date/time, then use the book_call function to schedule it. Confirm the booking details with them before finalizing.
 
 ### Voice & Delivery Instructions (CRITICAL):
 - Speak slowly with a warm, measured, and unhurried pace.
@@ -69,6 +70,38 @@ ${lead.leadData}
       config: {
         systemInstruction,
         model: "models/gemini-3.1-flash-live-preview",
+        tools: [
+          {
+            functionDeclarations: [
+              {
+                name: "book_call",
+                description: "Book a 30-minute consultation call with the business. Use this when the user wants to schedule a meeting or call.",
+                parameters: {
+                  type: "OBJECT",
+                  properties: {
+                    name: {
+                      type: "STRING",
+                      description: "Full name of the person booking the call",
+                    },
+                    email: {
+                      type: "STRING",
+                      description: "Email address of the person booking the call",
+                    },
+                    preferred_date: {
+                      type: "STRING",
+                      description: "Preferred date in YYYY-MM-DD format (e.g., 2025-07-15)",
+                    },
+                    preferred_time: {
+                      type: "STRING",
+                      description: "Preferred time in HH:MM format in 24-hour clock (e.g., 10:00, 14:30)",
+                    },
+                  },
+                  required: ["name", "email", "preferred_date", "preferred_time"],
+                },
+              },
+            ],
+          },
+        ],
       },
     });
   } catch (error) {
