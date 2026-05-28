@@ -218,13 +218,26 @@ export default function VoiceDemoPage() {
           </button>
         )}
 
-        <div className="mt-8 text-xs text-[rgba(200,215,240,0.4)] flex items-center gap-2">
+        {status === "listening" && (
+          <div className="mt-4 w-full px-4 py-3 rounded-lg border border-[rgba(255,180,0,0.25)] bg-[rgba(255,180,0,0.06)] flex items-center gap-2.5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffb400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span className="text-xs text-[rgba(255,200,80,0.9)] leading-snug">
+              Interruption is disabled in this demo. Please wait for the agent to finish speaking before responding.
+            </span>
+          </div>
+        )}
+
+        <div className="mt-4 text-xs text-[rgba(200,215,240,0.4)] flex items-center gap-2">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="8" x2="12" y2="12"></line>
             <line x1="12" y1="16" x2="12.01" y2="16"></line>
           </svg>
-          Note: User interruption is disabled in this demo environment.
+          Demo auto-ends after 2 minutes.
         </div>
 
         {status === "disconnected" && (
