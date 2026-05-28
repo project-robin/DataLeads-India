@@ -20,6 +20,7 @@ export default function VoiceDemoPage() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transcriptRef = useRef<{ role: string; text: string; timestamp: number }[]>([]);
   const speechRecognitionRef = useRef<any>(null);
+  const calApiRef = useRef<any>(null);
 
   const saveTranscript = useMutation(api.conversations.saveTranscript);
 
@@ -48,6 +49,7 @@ export default function VoiceDemoPage() {
     (async function () {
       const cal = await getCalApi({"namespace":"30min"});
       cal("ui", {"styles":{"branding":{"brandColor":"#00d4ff"}},"hideEventTypeDetails":false,"layout":"month_view"});
+      calApiRef.current = cal;
     })();
   }, []);
 
@@ -123,25 +125,13 @@ export default function VoiceDemoPage() {
     };
 
     client.onFunctionCall = async (name, args) => {
-      if (name === "book_call") {
-        const res = await fetch("/api/cal-com", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "create_booking",
-            name: args.name,
-            email: args.email,
-            start: `${args.preferred_date}T${args.preferred_time}:00Z`,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Booking failed");
-        return {
-          success: true,
-          bookingUid: data.bookingUid,
-          start: data.start,
-          message: `Booking confirmed for ${args.preferred_date} at ${args.preferred_time}.`,
-        };
+      if (name === "open_booking_widget") {
+        if (calApiRef.current) {
+          calApiRef.current("modal", {
+            calLink: "kabir-aura-mpaprf/30min",
+          });
+        }
+        return { success: true, message: "Booking page opened for the user." };
       }
       return { error: `Unknown function: ${name}` };
     };
