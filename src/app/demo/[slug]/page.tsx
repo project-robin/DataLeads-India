@@ -20,7 +20,6 @@ export default function VoiceDemoPage() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transcriptRef = useRef<{ role: string; text: string; timestamp: number }[]>([]);
   const speechRecognitionRef = useRef<any>(null);
-  const calApiRef = useRef<any>(null);
 
   const saveTranscript = useMutation(api.conversations.saveTranscript);
 
@@ -49,7 +48,6 @@ export default function VoiceDemoPage() {
     (async function () {
       const cal = await getCalApi({"namespace":"30min"});
       cal("ui", {"styles":{"branding":{"brandColor":"#00d4ff"}},"hideEventTypeDetails":false,"layout":"month_view"});
-      calApiRef.current = cal;
     })();
   }, []);
 
@@ -124,18 +122,6 @@ export default function VoiceDemoPage() {
       transcriptRef.current.push({ role, text, timestamp: Date.now() });
     };
 
-    client.onFunctionCall = async (name, args) => {
-      if (name === "open_booking_widget") {
-        if (calApiRef.current) {
-          calApiRef.current("modal", {
-            calLink: "kabir-aura-mpaprf/30min",
-          });
-        }
-        return { success: true, message: "Booking page opened for the user." };
-      }
-      return { error: `Unknown function: ${name}` };
-    };
-
     await client.connect();
 
     if (speechRecognitionRef.current) {
@@ -172,7 +158,7 @@ export default function VoiceDemoPage() {
       {/* Permanent Top-Right Booking Button */}
       <button
         data-cal-namespace="30min"
-        data-cal-link="kabir-aura-mpaprf/30min"
+        data-cal-link="vectis-aura-mpaprf/30min"
         data-cal-config='{"layout":"month_view"}'
         className="absolute top-6 right-6 z-50 px-5 py-2.5 rounded-full border border-[rgba(0,212,255,0.3)] bg-[rgba(13,26,46,0.6)] backdrop-blur-md text-sm font-semibold text-[#00d4ff] hover:bg-[rgba(0,212,255,0.1)] hover:border-[rgba(0,212,255,0.6)] hover:shadow-[0_0_20px_rgba(0,212,255,0.2)] transition-all duration-300 flex items-center gap-2"
       >
@@ -263,7 +249,7 @@ export default function VoiceDemoPage() {
               </p>
               <button
                 data-cal-namespace="30min"
-                data-cal-link="kabir-aura-mpaprf/30min"
+                data-cal-link="vectis-aura-mpaprf/30min"
                 data-cal-config='{"layout":"month_view"}'
                 className="inline-flex items-center justify-center w-full px-6 py-3 rounded-full bg-gradient-to-r from-[#00d4ff] to-[#0088ff] text-[#05090f] font-semibold hover:shadow-[0_0_30px_rgba(0,212,255,0.4)] transition-all duration-300"
               >

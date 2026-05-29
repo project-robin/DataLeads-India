@@ -8,7 +8,6 @@ export class GeminiLiveClient {
   public onStateChange: ((state: "connecting" | "listening" | "error" | "disconnected", msg?: string) => void) | null = null;
   public onVolumeChange: ((volume: number) => void) | null = null;
   public onTranscript: ((role: string, text: string) => void) | null = null;
-  public onFunctionCall: ((name: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>) | null = null;
 
   constructor(
     private apiKey: string,
@@ -35,7 +34,18 @@ export class GeminiLiveClient {
         if (!this.audioContext || !this.ws) return;
 
         try {
-          // Send initial setup frame
+          // 1. Get mic permission FIRST so we can immediately stream audio
+          this.mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: 1,
+              echoCancellation: true,
+              autoGainControl: true,
+              noiseSuppression: true,
+            },
+          });
+
+          // 2. Send setup frame AFTER mic is ready — Gemini will generate greeting
+          //    and we can capture it since we're already listening
           this.ws.send(
             JSON.stringify({
               setup: {
@@ -54,16 +64,6 @@ export class GeminiLiveClient {
               },
             })
           );
-
-          // Start Microphone
-          this.mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              channelCount: 1,
-              echoCancellation: true,
-              autoGainControl: true,
-              noiseSuppression: true,
-            },
-          });
 
           if (!this.audioContext || !this.ws) return;
 
@@ -149,11 +149,6 @@ export class GeminiLiveClient {
               }
             }
           }
-
-          // Handle function calls from the model
-          if (msg.toolCall?.functionCalls) {
-            this.handleToolCall(msg.toolCall);
-          }
         } catch (err) {
           console.error("Error parsing WebSocket message:", err);
         }
@@ -219,24 +214,6 @@ export class GeminiLiveClient {
     this.nextPlayTime += audioBuffer.duration;
   }
 
-
-  private async handleToolCall(toolCall: { functionCalls: Array<{ id: string; name: string; args: Record<string, unknown> }> }) {
-    if (!this.onFunctionCall || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-
-    const functionResponses = await Promise.all(
-      toolCall.functionCalls.map(async (call) => {
-        try {
-          const result = await this.onFunctionCall!(call.name, call.args || {});
-          return { id: call.id, name: call.name, response: result };
-        } catch (err: any) {
-          console.error(`Error executing tool ${call.name}:`, err);
-          return { id: call.id, name: call.name, response: { error: err.message || "Tool execution failed" } };
-        }
-      })
-    );
-
-    this.ws.send(JSON.stringify({ toolResponse: { functionResponses } }));
-  }
 
   public disconnect(suppressStateChange = false) {
     if (this.ws) {
