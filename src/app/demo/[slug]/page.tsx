@@ -193,7 +193,7 @@ export default function VoiceDemoPage() {
           <div className="flex flex-col items-center gap-4 w-full">
             <div className="text-red-400 p-4 bg-red-400/10 rounded-lg w-full text-sm">
                 {errorMsg.includes("401") || errorMsg.includes("API key") 
-                  ? "Failed to authenticate. Please ensure GEMINI_API_KEY is set in your .env.local file and restart the server." 
+                  ? "Authentication failed. Please ensure the API key is configured correctly and restart the server." 
                   : errorMsg}
             </div>
             <button

@@ -156,7 +156,7 @@ export class GeminiLiveClient {
 
       this.ws.onerror = (error) => {
         console.error("WebSocket Error:", error);
-        this.onStateChange?.("error", "Connection failed. Please ensure your GEMINI_API_KEY is valid.");
+        this.onStateChange?.("error", "Connection failed. Please check your network connection and try again.");
         this.disconnect(true);
       };
 
@@ -165,7 +165,15 @@ export class GeminiLiveClient {
         // Standard normal closures are 1000, 1001 (going away), or 1005 (no status).
         // Anything else is treated as an abnormal connection closure or API error.
         if (event.code !== 1000 && event.code !== 1001 && event.code !== 1005) {
-          this.onStateChange?.("error", `Connection failed (code ${event.code}). Please check your API key validity and network.`);
+          let msg = "Connection failed. Please check your network connection and try again.";
+          if (event.code === 1008) {
+            msg = "Connection failed due to a policy restriction. Please try a different network or contact support.";
+          } else if (event.code === 1014) {
+            msg = "Connection failed due to a security certificate issue. Please check your network settings.";
+          } else if (event.code === 1011) {
+            msg = "Connection failed — the service is temporarily unavailable. Please try again in a moment.";
+          }
+          this.onStateChange?.("error", msg);
           this.disconnect(true);
         } else {
           this.disconnect(false);
