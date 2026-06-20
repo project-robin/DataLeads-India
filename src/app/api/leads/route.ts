@@ -109,9 +109,13 @@ Handoff Instructions: ${handoffInstructions || "N/A"}`;
     const uuid = crypto.randomUUID();
     await convex.mutation(api.leads.create, { uuid, leadData, slug, businessName });
 
-    // Build the dynamic URL using slug instead of UUID
-    const origin = req.headers.get("origin") || req.headers.get("host") || "http://localhost:3000";
-    const demoUrl = `${origin.startsWith("http") ? "" : "http://"}${origin}/demo/${slug}`;
+    // Build the demo URL — always use https in production
+    const host = req.headers.get("host") || "localhost:3000";
+    const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
+    const baseUrl = isLocal
+      ? `http://${host}`
+      : `https://${host}`;
+    const demoUrl = `${baseUrl}/demo/${slug}`;
 
     return NextResponse.json(
       {
