@@ -56,7 +56,7 @@ export class GeminiLiveClient {
                   speechConfig: {
                     voiceConfig: {
                       prebuiltVoiceConfig: {
-                        voiceName: "Aoede", // or Puck, Charon, Kore, Fenrir, Aoede
+                        voiceName: "Charon", // Informative, confident, calm — not shrill
                       },
                     },
                   },
