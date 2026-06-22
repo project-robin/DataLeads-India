@@ -21,4 +21,14 @@ export default defineSchema({
       })
     ),
   }).index("by_lead", ["leadId"]),
+
+  clicks: defineTable({
+    slug: v.string(),           // which demo was opened
+    timestamp: v.number(),      // Unix ms
+    userAgent: v.optional(v.string()),
+    referrer: v.optional(v.string()),
+    country: v.optional(v.string()),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_timestamp", ["timestamp"]),
 });

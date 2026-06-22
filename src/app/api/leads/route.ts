@@ -116,6 +116,7 @@ Handoff Instructions: ${handoffInstructions || "N/A"}`;
       ? `http://${host}`
       : `https://${host}`;
     const demoUrl = `${baseUrl}/demo/${slug}`;
+    const trackingUrl = `${baseUrl}/t/${slug}`;
 
     return NextResponse.json(
       {
@@ -123,6 +124,7 @@ Handoff Instructions: ${handoffInstructions || "N/A"}`;
         uuid,
         slug,
         demoUrl,
+        trackingUrl,
         leadData,
       },
       { status: 201 }

@@ -4,6 +4,18 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
+function formatTimeAgo(timestamp: number | null) {
+  if (!timestamp) return "Never";
+  const diff = Date.now() - timestamp;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -11,6 +23,7 @@ export default function AdminPage() {
   const [leadData, setLeadData] = useState("");
 
   const leads = useQuery(api.leads.list);
+  const clickStats = useQuery(api.clicks.getCountsBySlug);
   const createLead = useMutation(api.leads.create);
   const removeLead = useMutation(api.leads.remove);
 
@@ -101,37 +114,78 @@ export default function AdminPage() {
                 <div className="text-gray-400">No active demos found.</div>
               ) : (
                 <div className="space-y-4">
-                  {leads.map((lead) => (
-                    <div key={lead._id} className="bg-[#05090f] p-4 rounded border border-gray-800 flex justify-between items-start gap-4">
-                      <div className="flex-1 overflow-hidden">
-                        <div className="text-sm text-[#00d4ff] mb-2 font-mono break-all">
-                          {typeof window !== "undefined" ? window.location.origin : ""}/demo/{lead.slug || lead.uuid}
+                  {leads.map((lead) => {
+                    const slug = lead.slug || lead.uuid;
+                    const stats = clickStats?.[slug];
+                    const views = stats?.count || 0;
+                    const lastOpened = formatTimeAgo(stats?.lastClickAt || null);
+                    const mobileCount = stats?.mobile || 0;
+                    const desktopCount = stats?.desktop || 0;
+
+                    return (
+                      <div key={lead._id} className="bg-[#05090f] p-5 rounded-lg border border-gray-800 flex flex-col md:flex-row justify-between items-start gap-4 hover:border-[#00d4ff]/20 transition-all duration-300">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-syne font-bold text-white mb-2">{lead.businessName || "Voice Demo"}</h3>
+                          <div className="flex flex-col gap-1.5 mb-3">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-[#00d4ff] font-semibold uppercase tracking-wider text-[9px] bg-[#00d4ff]/10 px-1.5 py-0.5 rounded">Outreach Link</span>
+                              <span className="font-mono text-gray-300 break-all select-all">
+                                {typeof window !== "undefined" ? window.location.origin : ""}/t/{slug}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-gray-400 font-semibold uppercase tracking-wider text-[9px] bg-gray-800 px-1.5 py-0.5 rounded">Direct Link</span>
+                              <span className="font-mono text-gray-500 break-all select-all">
+                                {typeof window !== "undefined" ? window.location.origin : ""}/demo/{slug}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Stats Bar */}
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 mb-3 bg-[#0d1a2e]/40 px-3 py-1.5 rounded border border-[#00d4ff]/5">
+                            <span className="flex items-center gap-1">
+                              👁 <strong>{views}</strong> view{views !== 1 ? "s" : ""}
+                            </span>
+                            <span className="text-gray-700">|</span>
+                            <span className="flex items-center gap-1">
+                              🕐 Last opened: <strong>{lastOpened}</strong>
+                            </span>
+                            {views > 0 && (
+                              <>
+                                <span className="text-gray-700">|</span>
+                                <span className="flex items-center gap-1">
+                                  📱 {mobileCount} mobile / 💻 {desktopCount} desktop
+                                </span>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="text-xs text-gray-400 line-clamp-2 bg-[#0d1a2e]/20 p-2.5 rounded border border-gray-900/60 font-mono">
+                            {lead.leadData}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-400 line-clamp-2">
-                          {lead.leadData}
+                        <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto shrink-0">
+                          <button
+                            onClick={() => {
+                              if (typeof window !== "undefined") {
+                                navigator.clipboard.writeText(`${window.location.origin}/t/${slug}`);
+                                alert("Outreach link copied to clipboard!");
+                              }
+                            }}
+                            className="flex-1 md:flex-initial px-3 py-1.5 bg-[#00d4ff] text-[#05090f] font-bold text-xs rounded hover:bg-[#33ddff] transition-colors"
+                          >
+                            Copy Link
+                          </button>
+                          <button
+                            onClick={() => removeLead({ id: lead._id })}
+                            className="flex-1 md:flex-initial px-3 py-1.5 bg-red-900/20 text-red-400 text-xs rounded border border-red-900/30 hover:bg-red-900/40 transition-colors"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        <button
-                          onClick={() => {
-                            if (typeof window !== "undefined") {
-                              navigator.clipboard.writeText(`${window.location.origin}/demo/${lead.slug || lead.uuid}`);
-                              alert("Copied to clipboard!");
-                            }
-                          }}
-                          className="px-3 py-1 bg-gray-800 text-sm rounded hover:bg-gray-700"
-                        >
-                          Copy Link
-                        </button>
-                        <button
-                          onClick={() => removeLead({ id: lead._id })}
-                          className="px-3 py-1 bg-red-900/30 text-red-400 text-sm rounded hover:bg-red-900/60"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

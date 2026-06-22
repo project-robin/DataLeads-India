@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as clicks from "../clicks.js";
 import type * as conversations from "../conversations.js";
 import type * as leads from "../leads.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  clicks: typeof clicks;
   conversations: typeof conversations;
   leads: typeof leads;
 }>;
