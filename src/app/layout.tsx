@@ -1,29 +1,32 @@
 import type { Metadata } from "next";
-import { DM_Sans, Syne, Bebas_Neue } from "next/font/google";
+import { Castoro, Inter, Manrope, Geist } from "next/font/google";
 import "./globals.css";
 import ConvexClientProvider from "./ConvexClientProvider";
+import { cn } from "@/lib/utils";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-});
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
-const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
-});
-
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas-neue",
+const castoro = Castoro({
+  variable: "--font-castoro",
   subsets: ["latin"],
   weight: ["400"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+});
+
 export const metadata: Metadata = {
-  title: "DataLeads India — Verified B2B Data for Financial Professionals",
-  description: "Verified B2B GST Data delivered directly to Chartered Accountants",
+  title: "Vetics.space — 24/7 Conversational AI Receptionists & Call Assistants",
+  description: "Vetics.space deploys natural AI voice receptionists for service-based businesses. Capture missed calls, automate appointment scheduling, and call back web leads in under 10 seconds with 98%+ conversation accuracy.",
 };
 
 export default function RootLayout({
@@ -33,8 +36,8 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${dmSans.variable} ${syne.variable} ${bebasNeue.variable} antialiased`}
+      lang="en-IN"
+      className={cn("antialiased", castoro.variable, inter.variable, manrope.variable, "font-sans", geist.variable)}
     >
       <body>
         <ConvexClientProvider>{children}</ConvexClientProvider>
