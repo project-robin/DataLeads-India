@@ -122,7 +122,6 @@ export default function Home() {
       ref={containerRef}
       className="relative overflow-hidden bg-grid-overlay bg-[#F7F7F5] min-h-screen text-[#111111] font-sans selection:bg-[#E7E7E4]"
     >
-      {/* HEADER NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 bg-[#F7F7F5]/85 backdrop-blur-md border-b border-[#111111]/5 transition-all duration-300">
         <a href="#" className="flex items-center gap-2 text-xl font-bold tracking-tighter text-[#111111] font-serif hover:opacity-80 transition-opacity">
           Vetics<span className="text-[10px] font-sans font-bold tracking-widest uppercase bg-[#111111] text-[#F7F7F5] px-1.5 py-0.5 rounded">.space</span>
@@ -142,7 +141,7 @@ export default function Home() {
           data-cal-namespace={calNamespace}
           data-cal-link={calLink}
           data-cal-config='{"layout":"month_view"}'
-          className="text-xs font-bold uppercase tracking-wider bg-[#111111] text-[#F7F7F5] border border-[#111111] px-5 py-2.5 rounded-full hover:bg-transparent hover:text-[#111111] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer shadow-sm shadow-[#111111]/5"
+          className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-[#111111] text-[#F7F7F5] border border-[#111111] px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full hover:bg-transparent hover:text-[#111111] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer shadow-sm shadow-[#111111]/5"
         >
           Book Consultation
         </button>
@@ -182,11 +181,11 @@ export default function Home() {
         {/* HERO SHOWCASE (PRODUCT PANEL) */}
         <div className="hero-showcase w-full mt-6 bg-[#F3F2EF] rounded-3xl p-6 md:p-8 flex flex-col justify-between relative overflow-hidden border border-[#E7E7E4] min-h-[500px] shadow-sm shadow-[#111111]/2">
           {/* Top Panel Controls */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 z-10">
-            <div className="flex bg-[#FCFCFB] p-1 rounded-full border border-[#E7E7E4] shadow-sm">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 z-10 w-full">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto bg-[#FCFCFB] p-1.5 rounded-2xl sm:rounded-full border border-[#E7E7E4] shadow-sm gap-1 sm:gap-0">
               <button
                 onClick={() => setActiveTab("receptionist")}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl sm:rounded-full text-xs font-semibold transition-all cursor-pointer w-full sm:w-auto text-center ${
                   activeTab === "receptionist" ? "bg-[#111111] text-[#F7F7F5]" : "text-[#595959] hover:text-[#111111]"
                 }`}
               >
@@ -194,7 +193,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setActiveTab("dialer")}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl sm:rounded-full text-xs font-semibold transition-all cursor-pointer w-full sm:w-auto text-center ${
                   activeTab === "dialer" ? "bg-[#111111] text-[#F7F7F5]" : "text-[#595959] hover:text-[#111111]"
                 }`}
               >
@@ -202,16 +201,12 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setActiveTab("crm")}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl sm:rounded-full text-xs font-semibold transition-all cursor-pointer w-full sm:w-auto text-center ${
                   activeTab === "crm" ? "bg-[#111111] text-[#F7F7F5]" : "text-[#595959] hover:text-[#111111]"
                 }`}
               >
                 Calendar & Software Booking
               </button>
-            </div>
-            <div className="bg-[#FCFCFB] px-4 py-2 rounded-full border border-[#E7E7E4] flex items-center gap-2 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#111111]">Live Voice Line Active</span>
             </div>
           </div>
 
@@ -257,26 +252,26 @@ export default function Home() {
             </div>
 
             {/* Telemetry Metrics */}
-            <div className="grid grid-cols-3 gap-6 w-full py-1">
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase tracking-wider text-[#595959] font-bold">Response Time</span>
-                <span className="text-sm font-bold text-[#111111] mt-0.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 w-full py-1">
+              <div className="flex flex-col items-center sm:items-start">
+                <span className="text-[9px] uppercase tracking-wider text-[#595959] font-bold text-center sm:text-left">Response Time</span>
+                <span className="text-sm font-bold text-[#111111] mt-0.5 text-center sm:text-left">
                   {activeTab === "receptionist" ? "~0.8s" : activeTab === "dialer" ? "~0.8s" : "< 0.5s"}
                 </span>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase tracking-wider text-[#595959] font-bold">
+              <div className="flex flex-col items-center sm:items-start">
+                <span className="text-[9px] uppercase tracking-wider text-[#595959] font-bold text-center sm:text-left">
                   {activeTab === "crm" ? "Sync status" : "Connection Rate"}
                 </span>
-                <span className="text-sm font-bold text-[#111111] mt-0.5">
+                <span className="text-sm font-bold text-[#111111] mt-0.5 text-center sm:text-left">
                   {activeTab === "receptionist" ? "98%+ Accurate" : activeTab === "dialer" ? "< 10s callback" : "Real-time"}
                 </span>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase tracking-wider text-[#595959] font-bold">
+              <div className="flex flex-col items-center sm:items-start">
+                <span className="text-[9px] uppercase tracking-wider text-[#595959] font-bold text-center sm:text-left">
                   {activeTab === "crm" ? "Integration" : "Interface"}
                 </span>
-                <span className="text-sm font-bold text-[#111111] mt-0.5">
+                <span className="text-sm font-bold text-[#111111] mt-0.5 text-center sm:text-left">
                   {activeTab === "receptionist" ? "Conversational" : activeTab === "dialer" ? "Local Caller" : "Calendar Sync"}
                 </span>
               </div>
@@ -284,12 +279,12 @@ export default function Home() {
           </div>
 
           {/* Bottom Bar Info Row */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 z-10 bg-[#FCFCFB]/70 backdrop-blur-md p-4 rounded-2xl border border-[#E7E7E4] shadow-sm">
-            <div className="flex gap-6 overflow-x-auto no-scrollbar py-1">
-              <span className="text-xs font-semibold text-[#111111] whitespace-nowrap">Interactive Booking Demo</span>
-              <span className="text-xs font-semibold text-[#595959] whitespace-nowrap">FAQ Answering</span>
-              <span className="text-xs font-semibold text-[#595959] whitespace-nowrap">Calendar Scheduling</span>
-              <span className="text-xs font-semibold text-[#595959] whitespace-nowrap">Zero Dropdowns or Buttons</span>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 z-10 bg-[#FCFCFB]/70 backdrop-blur-md p-4 rounded-2xl border border-[#E7E7E4] shadow-sm w-full">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center sm:justify-start py-1">
+              <span className="text-xs font-semibold text-[#111111]">Interactive Booking Demo</span>
+              <span className="text-xs font-semibold text-[#595959]">FAQ Answering</span>
+              <span className="text-xs font-semibold text-[#595959]">Calendar Scheduling</span>
+              <span className="text-xs font-semibold text-[#595959]">Zero Dropdowns or Buttons</span>
             </div>
             <button
               data-cal-namespace={calNamespace}
