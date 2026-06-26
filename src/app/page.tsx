@@ -157,21 +157,30 @@ export default function Home() {
             <h1 className="hero-title text-4xl md:text-6xl lg:text-7xl font-serif text-[#111111] leading-[1.08] tracking-tight mb-6 max-w-3xl">
               Never Miss a Booking or a <span className="italic font-serif text-[#A87C43]">Customer Call Again.</span>
             </h1>
-            <div className="hero-actions flex gap-4 mt-2 flex-wrap">
+            
+            {/* Mobile description: clean, concise, placed above buttons */}
+            <p className="hero-sub block lg:hidden text-sm text-[#595959] leading-relaxed font-light mb-6 max-w-xl">
+              24/7 conversational voice assistants that answer questions, schedule bookings, and call back leads instantly—with zero phone menus.
+            </p>
+
+            <div className="hero-actions flex flex-row gap-3 mt-2 w-full max-w-md">
               <button
                 data-cal-namespace={calNamespace}
                 data-cal-link={calLink}
                 data-cal-config='{"layout":"month_view"}'
-                className="text-xs font-bold uppercase tracking-wider bg-[#111111] text-[#F7F7F5] border border-[#111111] px-6 py-3.5 rounded-full hover:bg-transparent hover:text-[#111111] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer shadow-md shadow-[#111111]/10"
+                className="flex-1 lg:flex-none text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-[#111111] text-[#F7F7F5] border border-[#111111] px-4 py-3 lg:px-6 lg:py-3.5 rounded-full hover:bg-transparent hover:text-[#111111] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer shadow-md shadow-[#111111]/10 whitespace-nowrap"
               >
-                Try a Live Demo Call
+                Try Live Demo
               </button>
-              <a href="#capabilities" className="inline-flex items-center text-xs font-bold uppercase tracking-wider text-[#111111] border border-[#111111]/15 px-6 py-3.5 rounded-full hover:border-[#111111] hover:-translate-y-0.5 transition-all duration-200">
+              <a 
+                href="#capabilities" 
+                className="flex-1 lg:flex-none text-center inline-flex items-center justify-center text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#111111] border border-[#111111]/15 px-4 py-3 lg:px-6 lg:py-3.5 rounded-full hover:border-[#111111] hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
+              >
                 View Solutions &rarr;
               </a>
             </div>
           </div>
-          <div className="lg:col-span-4 lg:col-start-9 pt-2 lg:pt-14">
+          <div className="lg:col-span-4 lg:col-start-9 pt-2 lg:pt-14 hidden lg:block">
             <p className="hero-sub text-base md:text-lg text-[#595959] leading-relaxed font-light">
               We deploy custom, human-like voice receptionists and automated call assistants that run 24/7. Handle bookings, answer customer FAQs, and call back web leads in under 10 seconds—with zero phone menus or button presses.
             </p>
