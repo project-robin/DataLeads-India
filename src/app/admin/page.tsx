@@ -179,7 +179,7 @@ function LeadRow({
                   Transcripts: {lead.businessName || "Voice Demo"}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-[#595959] mt-1">
-                  Recorded dialogue logs between visitors and the custom Vetics Voice Agent.
+                  Recorded dialogue logs between visitors and the custom Vectis Voice Agent.
                 </DialogDescription>
               </DialogHeader>
               
@@ -202,7 +202,7 @@ function LeadRow({
                             className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
                           >
                             <span className="text-[9px] uppercase tracking-wider text-[#595959]/60 font-bold mb-1 px-2">
-                              {isUser ? "User / Caller" : "Vetics Assistant"}
+                              {isUser ? "User / Caller" : "Vectis Assistant"}
                             </span>
                             <div
                               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
@@ -368,7 +368,7 @@ export default function AdminPage() {
             <div className="mx-auto w-12 h-12 rounded-2xl bg-[#F3F2EF] flex items-center justify-center mb-4 border border-[#111111]/5">
               <KeyRound className="size-5 text-[#111111]" />
             </div>
-            <CardTitle className="font-serif text-3xl text-[#111111]">Vetics.space</CardTitle>
+            <CardTitle className="font-serif text-3xl text-[#111111]">Vectis.space</CardTitle>
             <CardDescription className="text-xs text-[#595959] mt-1.5 font-light">
               Enter credentials to access the Client Demo Control Center.
             </CardDescription>
@@ -407,7 +407,7 @@ export default function AdminPage() {
             <span>Back to Site</span>
           </a>
           <div className="font-serif text-lg text-[#111111] flex items-center gap-2">
-            Vetics<span className="text-[10px] font-sans font-bold tracking-widest uppercase bg-[#111111] text-[#F7F7F5] px-1.5 py-0.5 rounded">.space</span>
+            Vectis<span className="text-[10px] font-sans font-bold tracking-widest uppercase bg-[#111111] text-[#F7F7F5] px-1.5 py-0.5 rounded">.space</span>
             <Badge variant="outline" className="text-[8px] uppercase tracking-widest h-auto border-[#111111]/10 text-[#111111] font-bold px-2 py-0.5 bg-[#F3F2EF]">
               Admin
             </Badge>

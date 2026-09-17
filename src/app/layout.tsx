@@ -25,8 +25,8 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Vetics.space — 24/7 Conversational AI Receptionists & Call Assistants",
-  description: "Vetics.space deploys natural AI voice receptionists for service-based businesses. Capture missed calls, automate appointment scheduling, and call back web leads in under 10 seconds with 98%+ conversation accuracy.",
+  title: "Vectis.space — 24/7 Conversational AI Receptionists & Call Assistants",
+  description: "Vectis.space deploys natural AI voice receptionists for service-based businesses. Capture missed calls, automate appointment scheduling, and call back web leads in under 10 seconds with 98%+ conversation accuracy.",
 };
 
 export default function RootLayout({

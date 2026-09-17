@@ -124,7 +124,7 @@ export default function Home() {
     >
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 bg-[#F7F7F5]/85 backdrop-blur-md border-b border-[#111111]/5 transition-all duration-300">
         <a href="#" className="flex items-center gap-2 text-xl font-bold tracking-tighter text-[#111111] font-serif hover:opacity-80 transition-opacity">
-          Vetics<span className="text-[10px] font-sans font-bold tracking-widest uppercase bg-[#111111] text-[#F7F7F5] px-1.5 py-0.5 rounded">.space</span>
+          Vectis<span className="text-[10px] font-sans font-bold tracking-widest uppercase bg-[#111111] text-[#F7F7F5] px-1.5 py-0.5 rounded">.space</span>
         </a>
         <div className="hidden md:flex items-center gap-8">
           <a href="#about" className="text-xs font-semibold uppercase tracking-wider text-[#595959] hover:text-[#111111] transition-colors">
@@ -387,7 +387,7 @@ export default function Home() {
                 Small businesses miss up to <span className="italic font-serif text-[#92652B]">62% of incoming calls.</span>
               </h3>
               <p className="text-xs md:text-sm text-[#595959] leading-relaxed font-light">
-                When a customer calls a dental clinic, spa, or restaurant during a rush, they expect an immediate answer. If the call goes to voicemail, they hang up and dial your nearest competitor. Vetics voice assistants field every call instantly, booking appointments and answering questions with zero hold time.
+                When a customer calls a dental clinic, spa, or restaurant during a rush, they expect an immediate answer. If the call goes to voicemail, they hang up and dial your nearest competitor. Vectis voice assistants field every call instantly, booking appointments and answering questions with zero hold time.
               </p>
             </div>
             
@@ -555,7 +555,7 @@ export default function Home() {
                     {activeStep === 3 && "Booking confirmed & Calendar Sync"}
                   </h4>
                   <p className="text-xs text-[#595959] leading-relaxed font-light">
-                    {activeStep === 1 && "A client dials your front desk, or a prospect submits a web lead form. Vetics captures the event and routes it to the voice assistant pathway immediately."}
+                    {activeStep === 1 && "A client dials your front desk, or a prospect submits a web lead form. Vectis captures the event and routes it to the voice assistant pathway immediately."}
                     {activeStep === 2 && "The voice receptionist answers instantly. Speaks naturally with zero button tree menus. Qualifies the caller's request, resolves FAQs, and checks calendar slots."}
                     {activeStep === 3 && "Once the booking details are gathered, the system schedules the slot directly in your calendar software (Jane, Mindbody, HubSpot) and updates your records."}
                   </p>
@@ -617,7 +617,7 @@ export default function Home() {
             Scale your front-desk capacity today.
           </h2>
           <p className="text-base md:text-lg text-[#FCFCFB]/70 font-light leading-relaxed mb-10 max-w-xl mx-auto">
-            Eliminate missed calls, automate your scheduling, and follow up with leads instantly. Let Vetics voice assistants keep your calendar full.
+            Eliminate missed calls, automate your scheduling, and follow up with leads instantly. Let Vectis voice assistants keep your calendar full.
           </p>
           <button
             data-cal-namespace={calNamespace}
@@ -635,7 +635,7 @@ export default function Home() {
         <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-start gap-12 pb-12 border-b border-[#E7E7E4]">
           <div className="max-w-xs">
             <a href="#" className="flex items-center gap-2 text-xl font-bold tracking-tighter text-[#111111] font-serif hover:opacity-80 transition-opacity">
-              Vetics<span className="text-[9px] font-sans font-bold tracking-widest uppercase bg-[#111111] text-[#F7F7F5] px-1 py-0.5 rounded">.space</span>
+              Vectis<span className="text-[9px] font-sans font-bold tracking-widest uppercase bg-[#111111] text-[#F7F7F5] px-1 py-0.5 rounded">.space</span>
             </a>
             <p className="text-xs text-[#595959] mt-4 leading-relaxed font-light">
               24/7 conversational voice receptionists and instant outbound call assistants for modern business scheduling.
@@ -653,7 +653,7 @@ export default function Home() {
             <div>
               <h4 className="text-[10px] tracking-[0.15em] uppercase text-[#111111] font-bold mb-4">Connect</h4>
               <ul className="flex flex-col gap-2.5 text-xs text-[#595959] font-semibold list-none p-0 m-0">
-                <li><a href="mailto:support@vetics.space" className="hover:text-[#111111] transition-colors">support@vetics.space</a></li>
+                <li><a href="mailto:support@vectis.space" className="hover:text-[#111111] transition-colors">support@vectis.space</a></li>
                 <li>
                   <button
                     data-cal-namespace={calNamespace}
@@ -670,9 +670,9 @@ export default function Home() {
         </div>
 
         <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 pt-8 text-[10px] text-[#595959] font-light">
-          <p>&copy; {new Date().getFullYear()} Vetics.space. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Vectis.space. All rights reserved.</p>
           <p className="disclaimer max-w-md text-left md:text-right leading-normal">
-            Vetics.space is a technology platform building custom conversational voice integrations. All test sessions are logged and transcribed for verification.
+            Vectis.space is a technology platform building custom conversational voice integrations. All test sessions are logged and transcribed for verification.
           </p>
         </div>
       </footer>

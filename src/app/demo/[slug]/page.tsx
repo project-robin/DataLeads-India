@@ -246,7 +246,7 @@ export default function VoiceDemoPage() {
         </div>
 
         <h1 className="font-serif text-3xl md:text-4xl text-[#111111] mb-2 leading-tight tracking-tight">
-          Vetics Voice Agent
+          Vectis Voice Agent
         </h1>
         
         {/* Explanatory description area */}
