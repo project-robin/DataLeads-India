@@ -1,9 +1,24 @@
+import type { MicVAD } from "@ricky0123/vad-web";
+
+// VAD assets (worklet, Silero model, onnxruntime wasm) are served from jsDelivr.
+// Versions must match the exact versions pinned in package.json.
+const VAD_ASSET_PATH = "https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.30/dist/";
+const ORT_WASM_PATH = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/";
+
+// Mic audio kept while the user is silent, flushed on speech start so the first
+// syllables (spoken before Silero confirms speech) aren't clipped. ~1s at 128ms/chunk.
+const PRE_ROLL_CHUNKS = 8;
+
 export class GeminiLiveClient {
   private ws: WebSocket | null = null;
   private audioContext: AudioContext | null = null;
   private mediaStream: MediaStream | null = null;
   private workletNode: AudioWorkletNode | null = null;
   private nextPlayTime: number = 0;
+  private vad: MicVAD | null = null;
+  private userSpeaking = false;
+  private preRoll: Int16Array[] = [];
+  private playingSources = new Set<AudioBufferSourceNode>();
   
   public onStateChange: ((state: "connecting" | "listening" | "error" | "disconnected", msg?: string) => void) | null = null;
   public onVolumeChange: ((volume: number) => void) | null = null;
@@ -23,8 +38,10 @@ export class GeminiLiveClient {
         sampleRate: 16000,
       });
 
-      // Load the Worklet
+      // Load the Worklet, and the Silero VAD model in parallel with the WebSocket handshake
       await this.audioContext.audioWorklet.addModule("/audio-processor.js");
+      const vadReady = this.createVad(this.audioContext);
+      vadReady.catch(() => {}); // surfaced when awaited in onopen
 
       // 2. Connect WebSocket (v1beta is required when authenticating with a standard API key)
       const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${this.apiKey}`;
@@ -51,6 +68,11 @@ export class GeminiLiveClient {
               setup: {
                 model: this.config.model || "models/gemini-3.1-flash-live-preview",
                 systemInstruction: this.config.systemInstruction,
+                // Turn-taking is driven by the client-side Silero VAD (activityStart/activityEnd).
+                // An activityStart while the model is talking interrupts it (barge-in).
+                realtimeInputConfig: {
+                  automaticActivityDetection: { disabled: true },
+                },
                 generationConfig: {
                   responseModalities: ["AUDIO"],
                   speechConfig: {
@@ -74,45 +96,37 @@ export class GeminiLiveClient {
             if (this.ws?.readyState === WebSocket.OPEN) {
               // Calculate a simple volume metric for the UI visualizer
               let max = 0;
-              let sum = 0;
               for (let i = 0; i < event.data.length; i++) {
                   const val = Math.abs(event.data[i]);
-                  sum += val;
                   if (val > max) max = val;
               }
-              const avg = sum / event.data.length;
               
               if (this.onVolumeChange) {
                   // Send true max volume (scaled 0-100)
                   this.onVolumeChange(Math.min(100, (max / 32768) * 1000)); 
               }
 
-              // SOFTWARE VAD & AUDIO SUPPRESSION SHIELD:
-              // 1. If the volume is below our threshold (500), send silence to block background noise.
-              // 2. If the agent is currently speaking (or was speaking in the last 500ms), MUTE the microphone.
-              //    This guarantees the agent never interrupts itself during network stutters.
-              const currentTime = this.audioContext ? this.audioContext.currentTime : 0;
-              const isAgentSpeaking = this.nextPlayTime > currentTime - 0.5; // 500ms tail
-              const threshold = 500; // Increased to prevent breathing from interrupting
-              
-              if (isAgentSpeaking || max < threshold) {
-                 // Send silence
-                 const silentBuffer = new Int16Array(event.data.length);
-                 const base64Data = this.arrayBufferToBase64(silentBuffer.buffer);
-                 this.ws.send(JSON.stringify({
-                    realtimeInput: { audio: { mimeType: "audio/pcm;rate=16000", data: base64Data } }
-                 }));
+              // Only stream audio while the VAD says the user is speaking; otherwise
+              // keep a short pre-roll so the start of the utterance isn't lost.
+              if (this.userSpeaking) {
+                this.sendAudio(event.data);
               } else {
-                 // Send real audio
-                 const base64Data = this.arrayBufferToBase64(event.data.buffer);
-                 this.ws.send(JSON.stringify({
-                    realtimeInput: { audio: { mimeType: "audio/pcm;rate=16000", data: base64Data } }
-                 }));
+                this.preRoll.push(event.data);
+                if (this.preRoll.length > PRE_ROLL_CHUNKS) this.preRoll.shift();
               }
             }
           };
 
           source.connect(this.workletNode);
+
+          const vad = await vadReady;
+          if (!this.ws) {
+            // Disconnected while the model was loading
+            vad.destroy().catch(console.error);
+            return;
+          }
+          this.vad = vad;
+          await vad.start();
           
           this.onStateChange?.("listening");
         } catch (err: any) {
@@ -138,7 +152,11 @@ export class GeminiLiveClient {
 
           // Parse the UTF-8 JSON message
           const msg = JSON.parse(textData);
-          if (msg.serverContent?.modelTurn?.parts) {
+          if (msg.serverContent?.interrupted) {
+            this.stopPlayback();
+          }
+          // Drop agent audio while the user is talking (e.g. tail chunks of an interrupted turn)
+          if (msg.serverContent?.modelTurn?.parts && !this.userSpeaking) {
             const parts = msg.serverContent.modelTurn.parts;
             for (const part of parts) {
               if (part.inlineData && part.inlineData.data) {
@@ -187,6 +205,63 @@ export class GeminiLiveClient {
     }
   }
 
+  private async createVad(audioContext: AudioContext): Promise<MicVAD> {
+    const { MicVAD } = await import("@ricky0123/vad-web");
+    return MicVAD.new({
+      model: "v5",
+      baseAssetPath: VAD_ASSET_PATH,
+      onnxWASMBasePath: ORT_WASM_PATH,
+      audioContext,
+      startOnLoad: false,
+      // Share the mic stream we already opened; disconnect() owns stopping it.
+      getStream: async () => this.mediaStream!,
+      pauseStream: async () => {},
+      resumeStream: async (stream) => stream,
+      positiveSpeechThreshold: 0.5,
+      negativeSpeechThreshold: 0.35,
+      // Sustained speech required before we treat it as a turn / barge-in (filters coughs, clicks)
+      minSpeechMs: 300,
+      // Silence before the user's turn ends (Gemini recommends >= 500ms for manual VAD)
+      redemptionMs: 700,
+      onSpeechRealStart: () => this.handleUserSpeechStart(),
+      onSpeechEnd: () => this.handleUserSpeechEnd(),
+    });
+  }
+
+  private handleUserSpeechStart() {
+    if (this.ws?.readyState !== WebSocket.OPEN || this.userSpeaking) return;
+    this.userSpeaking = true;
+    // Barge-in: cut the agent off locally right away; the server cancels its turn on activityStart.
+    this.stopPlayback();
+    this.ws.send(JSON.stringify({ realtimeInput: { activityStart: {} } }));
+    for (const chunk of this.preRoll) this.sendAudio(chunk);
+    this.preRoll = [];
+  }
+
+  private handleUserSpeechEnd() {
+    if (!this.userSpeaking) return;
+    this.userSpeaking = false;
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ realtimeInput: { activityEnd: {} } }));
+    }
+  }
+
+  private sendAudio(pcm: Int16Array) {
+    if (this.ws?.readyState !== WebSocket.OPEN) return;
+    this.ws.send(JSON.stringify({
+      realtimeInput: { audio: { mimeType: "audio/pcm;rate=16000", data: this.arrayBufferToBase64(pcm.buffer as ArrayBuffer) } }
+    }));
+  }
+
+  private stopPlayback() {
+    for (const source of this.playingSources) {
+      source.onended = null;
+      try { source.stop(); } catch {}
+    }
+    this.playingSources.clear();
+    this.nextPlayTime = 0;
+  }
+
   private playAudioChunk(base64Data: string) {
     if (!this.audioContext) return;
 
@@ -220,10 +295,19 @@ export class GeminiLiveClient {
     }
     source.start(this.nextPlayTime);
     this.nextPlayTime += audioBuffer.duration;
+    this.playingSources.add(source);
+    source.onended = () => this.playingSources.delete(source);
   }
 
 
   public disconnect(suppressStateChange = false) {
+    if (this.vad) {
+      this.vad.destroy().catch(console.error);
+      this.vad = null;
+    }
+    this.userSpeaking = false;
+    this.preRoll = [];
+    this.playingSources.clear();
     if (this.ws) {
       this.ws.onclose = null;
       this.ws.onerror = null;

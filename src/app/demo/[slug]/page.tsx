@@ -356,7 +356,7 @@ export default function VoiceDemoPage() {
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
               <span className="text-[10px] text-[#A87C43] font-semibold leading-normal">
-                Please allow the agent to finish its response before speaking.
+                Feel free to jump in anytime — the agent will stop and listen when you start talking.
               </span>
             </div>
 
