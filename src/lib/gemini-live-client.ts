@@ -146,6 +146,15 @@ export class GeminiLiveClient {
 
           // Parse the UTF-8 JSON message
           const msg = JSON.parse(textData);
+          if (msg.setupComplete) {
+            // Kick off the call so the agent greets first instead of waiting for the caller
+            this.ws?.send(JSON.stringify({
+              clientContent: {
+                turns: [{ role: "user", parts: [{ text: "[Call connected]" }] }],
+                turnComplete: true,
+              },
+            }));
+          }
           if (msg.serverContent?.interrupted) {
             this.stopPlayback();
           }
