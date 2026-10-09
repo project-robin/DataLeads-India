@@ -19,9 +19,9 @@ export class GeminiLiveClient {
   private userSpeaking = false;
   private preRoll: Int16Array[] = [];
   private playingSources = new Set<AudioBufferSourceNode>();
+  private analyser: AnalyserNode | null = null;
   
   public onStateChange: ((state: "connecting" | "listening" | "error" | "disconnected", msg?: string) => void) | null = null;
-  public onVolumeChange: ((volume: number) => void) | null = null;
   public onTranscript: ((role: string, text: string) => void) | null = null;
 
   constructor(
@@ -40,6 +40,11 @@ export class GeminiLiveClient {
 
       // Load the Worklet, and the Silero VAD model in parallel with the WebSocket handshake
       await this.audioContext.audioWorklet.addModule("/audio-processor.js");
+      // Fed by both the mic and agent playback; drives the on-screen bars.
+      // 64-point FFT at 16kHz -> 250Hz bins.
+      this.analyser = this.audioContext.createAnalyser();
+      this.analyser.fftSize = 64;
+      this.analyser.minDecibels = -90;
       const vadReady = this.createVad(this.audioContext);
       vadReady.catch(() => {}); // surfaced when awaited in onopen
 
@@ -66,7 +71,7 @@ export class GeminiLiveClient {
           this.ws.send(
             JSON.stringify({
               setup: {
-                model: this.config.model || "models/gemini-3.1-flash-live-preview",
+                model: this.config.model || "models/gemini-3.8-live",
                 systemInstruction: this.config.systemInstruction,
                 // Turn-taking is driven by the client-side Silero VAD (activityStart/activityEnd).
                 // An activityStart while the model is talking interrupts it (barge-in).
@@ -94,18 +99,6 @@ export class GeminiLiveClient {
 
           this.workletNode.port.onmessage = (event) => {
             if (this.ws?.readyState === WebSocket.OPEN) {
-              // Calculate a simple volume metric for the UI visualizer
-              let max = 0;
-              for (let i = 0; i < event.data.length; i++) {
-                  const val = Math.abs(event.data[i]);
-                  if (val > max) max = val;
-              }
-              
-              if (this.onVolumeChange) {
-                  // Send true max volume (scaled 0-100)
-                  this.onVolumeChange(Math.min(100, (max / 32768) * 1000)); 
-              }
-
               // Only stream audio while the VAD says the user is speaking; otherwise
               // keep a short pre-roll so the start of the utterance isn't lost.
               if (this.userSpeaking) {
@@ -118,6 +111,7 @@ export class GeminiLiveClient {
           };
 
           source.connect(this.workletNode);
+          source.connect(this.analyser!);
 
           const vad = await vadReady;
           if (!this.ws) {
@@ -281,6 +275,7 @@ export class GeminiLiveClient {
     const source = this.audioContext.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(this.audioContext.destination);
+    if (this.analyser) source.connect(this.analyser);
 
     // Schedule playback to avoid gaps
     const currentTime = this.audioContext.currentTime;
@@ -299,6 +294,11 @@ export class GeminiLiveClient {
     source.onended = () => this.playingSources.delete(source);
   }
 
+
+  /** Fills `out` (0-255 per 250Hz band) with the current conversation spectrum. */
+  public getFrequencyData(out: Uint8Array<ArrayBuffer>) {
+    this.analyser?.getByteFrequencyData(out);
+  }
 
   public disconnect(suppressStateChange = false) {
     if (this.vad) {
@@ -323,6 +323,7 @@ export class GeminiLiveClient {
       this.workletNode.disconnect();
       this.workletNode = null;
     }
+    this.analyser = null;
     if (this.audioContext) {
       this.audioContext.close();
       this.audioContext = null;

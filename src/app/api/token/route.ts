@@ -74,7 +74,7 @@ ${lead.leadData}
       leadId: lead._id,
       config: {
         systemInstruction,
-        model: "models/gemini-3.1-flash-live-preview",
+        model: "models/gemini-3.8-live",
       },
     });
   } catch (error) {

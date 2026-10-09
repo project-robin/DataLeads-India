@@ -13,10 +13,9 @@ export default function VoiceDemoPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [status, setStatus] = useState<"loading" | "ready" | "connecting" | "listening" | "error" | "disconnected">("loading");
+  const [status, setStatus] = useState<"loading" | "ready" | "connecting" | "listening" | "error" | "disconnected" | "expired">("loading");
   const [errorMsg, setErrorMsg] = useState("");
   const [tokenInfo, setTokenInfo] = useState<any>(null);
-  const [volume, setVolume] = useState(0);
   
   const clientRef = useRef<GeminiLiveClient | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -24,6 +23,7 @@ export default function VoiceDemoPage() {
   const speechRecognitionRef = useRef<any>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
+  const barsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const saveTranscript = useMutation(api.conversations.saveTranscript);
 
@@ -101,6 +101,23 @@ export default function VoiceDemoPage() {
     };
   }, [status]);
 
+  // Drive the bars straight from the live audio spectrum (DOM writes, no re-render per frame)
+  useEffect(() => {
+    if (status !== "listening") return;
+    const bins = new Uint8Array(32);
+    let raf = 0;
+    const tick = () => {
+      clientRef.current?.getFrequencyData(bins);
+      barsRef.current.forEach((bar, i) => {
+        // Mirrored: centre bar = lowest voice band (250Hz), outer bars up to ~2kHz
+        if (bar) bar.style.height = `${Math.max(12, (bins[Math.abs(i - 6) + 1] / 255) * 100)}%`;
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
+  }, [status]);
+
   useEffect(() => {
     // Fetch token/config and verify lead
     const init = async () => {
@@ -111,7 +128,12 @@ export default function VoiceDemoPage() {
           body: JSON.stringify({ slug }),
         });
         const data = await res.json();
-        
+
+        // Demo was retired (or never existed)
+        if (res.status === 404) {
+          setStatus("expired");
+          return;
+        }
         if (!res.ok) throw new Error(data.error || "Failed to load demo");
         if (data.apiKey === "MOCK_KEY") {
             console.warn("Using MOCK_KEY. Set GEMINI_API_KEY in environment to enable real connection.");
@@ -145,10 +167,6 @@ export default function VoiceDemoPage() {
     client.onStateChange = (newState, msg) => {
       setStatus(newState);
       if (msg) setErrorMsg(msg);
-    };
-
-    client.onVolumeChange = (vol) => {
-      setVolume(vol);
     };
 
     client.onTranscript = (role, text) => {
@@ -234,6 +252,7 @@ export default function VoiceDemoPage() {
             {status === "listening" && "Agent Online"}
             {status === "disconnected" && "Call Concluded"}
             {status === "error" && "System Alert"}
+            {status === "expired" && "Line Closed"}
           </div>
           
           <div className="flex items-center gap-1.5 text-[9px] font-bold text-[#6B6B6B]/60 uppercase tracking-widest">
@@ -257,7 +276,17 @@ export default function VoiceDemoPage() {
           {status === "listening" && "Connection established. You can start speaking now — the agent is listening."}
           {status === "disconnected" && "Your demo session has ended. Check the Admin Control Panel to view transcripts."}
           {status === "error" && errorMsg}
+          {status === "expired" && "Fashionably late! This demo line has already been retired — our agent clocked out and went home. Want one built for your business? We'll spin up a fresh one just for you."}
         </p>
+
+        {status === "expired" && (
+          <a
+            href={`mailto:support@vectis.space?subject=${encodeURIComponent(`New demo request (${slug})`)}`}
+            className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-[#111111] text-[#FCFCFB] text-xs font-bold uppercase tracking-wider hover:bg-[#111111]/90 hover:-translate-y-0.5 transition-all duration-300 shadow-md shadow-[#111111]/10"
+          >
+            Email us for a fresh demo
+          </a>
+        )}
 
         {/* Loading spinners (only during loading) */}
         {status === "loading" && (
@@ -271,20 +300,17 @@ export default function VoiceDemoPage() {
         {(status === "ready" || status === "connecting" || status === "listening") && (
           <div className="flex items-end justify-center h-20 gap-1.5 w-full max-w-[260px] relative z-10 border-b border-[#111111]/5 pb-6 my-6">
             {[...Array(13)].map((_, i) => {
-              const modifier = 0.3 + (i % 4) * 0.22;
               const delay = `${i * 0.08}s`;
-              
               const isListening = status === "listening";
-              const barHeight = isListening
-                ? Math.max(12, Math.min(100, volume * 100 * modifier))
-                : 25; // 25% base height for breathing
 
               return (
                 <div
                   key={i}
+                  ref={(el) => { barsRef.current[i] = el; }}
                   className={`w-1.5 bg-[#111111] rounded-full ${!isListening ? "animate-wave-bar" : ""}`}
                   style={{
-                    height: `${barHeight}%`,
+                    // While listening, height is written per frame by the spectrum loop
+                    height: isListening ? undefined : "25%",
                     animationDelay: !isListening ? delay : undefined,
                     animationDuration: status === "ready" ? "2.5s" : status === "connecting" ? "0.8s" : undefined,
                     boxShadow: "0 0 12px rgba(17, 17, 17, 0.15)",
@@ -370,7 +396,7 @@ export default function VoiceDemoPage() {
         )}
 
         {/* Telemetry Telemetry Card grid inside Card */}
-        {status !== "disconnected" && (
+        {status !== "disconnected" && status !== "expired" && (
           <div className="grid grid-cols-2 gap-4 w-full mt-4 pt-4 border-t border-[#111111]/5">
             <div className="p-3 bg-[#F3F2EF] rounded-2xl border border-[#E7E7E4] text-left flex flex-col gap-0.5">
               <span className="text-[9px] uppercase tracking-wider text-[#6B6B6B] font-bold">Latency</span>
@@ -388,7 +414,7 @@ export default function VoiceDemoPage() {
         )}
 
         {/* 2-Minute session alert footer label */}
-        {status !== "disconnected" && (
+        {status !== "disconnected" && status !== "expired" && (
           <div className="mt-6 text-[10px] text-[#6B6B6B]/80 flex items-center gap-1.5 justify-center">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
